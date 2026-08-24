@@ -1,0 +1,27 @@
+.worktrees/
+
+# Dependencies and build output
+node_modules/
+dist/
+coverage/
+.vitest/
+playwright-report/
+test-results/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+*.log
+
+# Local persistence
+data/
+uploads/
+qdrant_storage/
+*.db
+*.sqlite
+*.sqlite-*
+
+# Editor and operating-system files
+.DS_Store
+Thumbs.db
