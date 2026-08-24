@@ -26,6 +26,19 @@ export function resolveChapterId (args) {
   return args.find((argument) => argument !== '--') ?? ''
 }
 
+export function resolvePackageManagerCommand (
+  packageManagerEntry,
+  nodeEntry = process.execPath,
+  platform = process.platform
+) {
+  if (/\.[cm]?js$/i.test(packageManagerEntry)) {
+    return { command: nodeEntry, args: [packageManagerEntry, 'test'], shell: false }
+  }
+
+  const needsWindowsShell = platform === 'win32' && /\.(?:cmd|bat)$/i.test(packageManagerEntry)
+  return { command: packageManagerEntry, args: ['test'], shell: needsWindowsShell }
+}
+
 export async function checkChapterStructure (repositoryRoot, chapterId) {
   if (!isChapterId(chapterId)) return ['Chapter id must be between 01 and 22']
 
@@ -74,9 +87,11 @@ function runProjectTests (repositoryRoot) {
   const pnpmEntry = process.env.npm_execpath
   if (!pnpmEntry) return { status: 1, message: 'Run chapter:check through pnpm so npm_execpath is available' }
 
-  const result = spawnSync(process.execPath, [pnpmEntry, 'test'], {
+  const invocation = resolvePackageManagerCommand(pnpmEntry)
+  const result = spawnSync(invocation.command, invocation.args, {
     cwd: repositoryRoot,
-    stdio: 'inherit'
+    stdio: 'inherit',
+    shell: invocation.shell
   })
   return { status: result.status ?? 1 }
 }

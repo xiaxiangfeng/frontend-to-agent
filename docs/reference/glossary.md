@@ -1,13 +1,29 @@
 # Agent 工程术语表
 
+## LLM
+
+Large Language Model，根据输入上下文预测并生成 Token 的模型。它是 Agent 的推理组件，不负责应用权限、持久化或最终事实校验。
+
 ## Agent
 
 由模型在受约束循环中选择行动、观察结果并调整下一步的软件系统。聊天界面本身不等于 Agent。
+
+## Agent Loop
+
+反复执行“构建上下文、提出行动、校验并执行、记录观察、判断是否停止”的受控循环。
 
 ## Workflow
 
 开发者预先定义步骤与控制流的执行过程。固定 workflow 和动态 Agent 可以组合使用。
 
+
+## Run
+
+从接收一个目标到完成、失败、取消或暂停的一次完整执行实例。
+
+## Step
+
+Run 中可单独记录和重试的一个执行单元，例如一次模型调用、工具调用或人工决策。
 ## Prompt
 
 提交给模型的指令与输入。System Prompt 只是上下文的一部分，不是完整的安全边界。
@@ -63,3 +79,7 @@ Model Context Protocol，用标准方式连接 Host、Client、Server 及其 Too
 ## Evaluation
 
 用固定任务、确定性规则和人工抽查衡量 Agent 行为，并防止模型或 Prompt 变更造成回归。
+
+## Guardrail
+
+限制输入、输出或行动的确定性规则，例如 Schema 校验、权限检查、预算上限与人工审批。Guardrail 不能只依赖 Prompt。
