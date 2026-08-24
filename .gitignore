@@ -3,6 +3,8 @@
 # Dependencies and build output
 node_modules/
 dist/
+docs/.vitepress/cache/
+docs/.vitepress/dist/
 coverage/
 .vitest/
 playwright-report/

@@ -1,0 +1,71 @@
+import { defineConfig } from 'vitepress'
+
+export default defineConfig({
+  lang: 'zh-CN',
+  title: '前端转 Agent 开发',
+  description: '面向前端开发者的 Agent 工程实战教程',
+  vite: {
+    server: {
+      host: '127.0.0.1',
+      port: 5174,
+      strictPort: true
+    }
+  },
+  themeConfig: {
+    nav: [
+      { text: '教程', link: '/tutorials/01-from-frontend-to-agent' },
+      { text: '原理', link: '/explanations/agent-vs-workflow' },
+      { text: 'How-to', link: '/how-to/author-a-chapter' },
+      { text: '参考', link: '/reference/chapter-map' }
+    ],
+    sidebar: {
+      '/tutorials/': [
+        {
+          text: '主线教程',
+          items: [
+            { text: '阅读说明', link: '/tutorials/README' },
+            { text: '第 1 章：从前端应用走向 Agent 应用', link: '/tutorials/01-from-frontend-to-agent' }
+          ]
+        }
+      ],
+      '/explanations/': [
+        {
+          text: '原理解释',
+          items: [
+            { text: '阅读说明', link: '/explanations/README' },
+            { text: 'Agent、聊天与 Workflow 的边界', link: '/explanations/agent-vs-workflow' }
+          ]
+        }
+      ],
+      '/how-to/': [
+        {
+          text: '操作指南',
+          items: [
+            { text: '阅读说明', link: '/how-to/README' },
+            { text: '在本地启动应用与教程站', link: '/how-to/run-project-locally' },
+            { text: '编写并验收一章教程', link: '/how-to/author-a-chapter' }
+          ]
+        }
+      ],
+      '/reference/': [
+        {
+          text: '参考资料',
+          items: [
+            { text: '阅读说明', link: '/reference/README' },
+            { text: '术语表', link: '/reference/glossary' },
+            { text: '章节检查点', link: '/reference/chapter-map' },
+            { text: '验证版本', link: '/reference/versions' }
+          ]
+        }
+      ]
+    },
+    outline: {
+      level: [2, 3],
+      label: '本页目录'
+    },
+    docFooter: {
+      prev: '上一页',
+      next: '下一页'
+    }
+  }
+})

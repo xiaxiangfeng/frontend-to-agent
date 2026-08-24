@@ -19,7 +19,20 @@ test('root package exposes the workspace quality commands', () => {
   assert.match(packageJson.engines.node, /24/)
   assert.deepEqual(
     Object.keys(packageJson.scripts).sort(),
-    ['build', 'chapter:check', 'docs:check', 'lint', 'test', 'typecheck']
+    [
+      'build',
+      'chapter:check',
+      'dev',
+      'dev:api',
+      'dev:web',
+      'docs:build',
+      'docs:check',
+      'docs:dev',
+      'docs:preview',
+      'lint',
+      'test',
+      'typecheck'
+    ]
   )
 })
 

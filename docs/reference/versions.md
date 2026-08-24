@@ -22,6 +22,8 @@
 | neostandard | 0.13.0 | TypeScript 与无 JSX 配置 |
 | `@types/node` | 24.13.3 | 对齐 Node 24 |
 | Fastify | 5.12.1 | API 应用 |
+| tsx | 4.23.12 | Fastify TypeScript 开发态热更新 |
+| VitePress | 2.0.0-alpha.19 | 本地教程站与静态文档构建；精确锁定以控制预发布升级 |
 | Vue | 3.5.41 | Composition API 与 script setup |
 | Vite | 8.2.2 | Vue 构建与 Vitest 运行时 |
 | `@vitejs/plugin-vue` | 6.0.8 | Vue SFC 转换 |

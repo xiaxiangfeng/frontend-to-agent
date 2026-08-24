@@ -1,13 +1,8 @@
-import { existsSync } from 'node:fs'
-import { fileURLToPath } from 'node:url'
 import { expect, test } from 'vitest'
 
-const appModuleUrl = new URL('../src/app.ts', import.meta.url)
+import { buildApp } from '../src/app.ts'
 
 test('GET /health/live reports that the API process is alive', async () => {
-  expect(existsSync(fileURLToPath(appModuleUrl)), 'apps/api/src/app.ts should exist').toBe(true)
-
-  const { buildApp } = await import(appModuleUrl.href)
   const app = buildApp()
 
   try {

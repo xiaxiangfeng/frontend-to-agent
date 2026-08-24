@@ -6,6 +6,14 @@
 2. 执行 `pnpm install --frozen-lockfile`。
 3. 执行 `pnpm lint`、`pnpm typecheck`、`pnpm test`、`pnpm docs:check` 和 `pnpm build`，确认起点干净。
 
+## 启动本地服务
+
+- `pnpm dev`：同时启动 Vue 与 Fastify。
+- `pnpm dev:web` / `pnpm dev:api`：单独启动一个应用。
+- `pnpm docs:dev`：启动本地教程站。
+
+完整说明见 [在本地启动应用与教程站](./docs/how-to/run-project-locally.md)。
+
 ## 开发循环
 
 - 行为修改先写失败测试，确认失败原因正确后再写最小实现。

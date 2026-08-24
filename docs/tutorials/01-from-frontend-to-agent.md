@@ -238,4 +238,5 @@ pnpm build
 - [Agent 工程术语表](../reference/glossary.md)
 - [章节与代码检查点映射](../reference/chapter-map.md)
 - [已验证版本](../reference/versions.md)
+- [在本地启动应用与教程站](../how-to/run-project-locally.md)
 - [编写并验收一章教程](../how-to/author-a-chapter.md)
