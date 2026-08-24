@@ -1,5 +1,8 @@
 .worktrees/
 
+# Local-only agent planning; never force-add to the public repository
+docs/superpowers/
+
 # Dependencies and build output
 node_modules/
 dist/

@@ -3,6 +3,7 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   lang: 'zh-CN',
   title: '前端转 Agent 开发',
+  srcExclude: ['superpowers/**'],
   description: '面向前端开发者的 Agent 工程实战教程',
   vite: {
     server: {
