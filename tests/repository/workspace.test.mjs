@@ -11,7 +11,7 @@ function requiredText (relativePath) {
   return readFileSync(absolutePath, 'utf8')
 }
 
-test('root package exposes the workspace quality commands', () => {
+test('root package exposes the workspace commands', () => {
   const packageJson = JSON.parse(requiredText('package.json'))
 
   assert.equal(packageJson.private, true)
@@ -30,6 +30,7 @@ test('root package exposes the workspace quality commands', () => {
       'docs:dev',
       'docs:preview',
       'lint',
+      'model:ask',
       'test',
       'typecheck'
     ]
@@ -47,6 +48,7 @@ test('example environment is safe and complete', () => {
   const example = requiredText('.env.example')
   const requiredVariables = [
     'DASHSCOPE_API_KEY',
+    'DASHSCOPE_BASE_URL',
     'QWEN_MODEL',
     'QWEN_EMBEDDING_MODEL',
     'APP_ACCESS_TOKEN',

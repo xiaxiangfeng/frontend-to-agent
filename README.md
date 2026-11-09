@@ -2,7 +2,7 @@
 
 面向前端开发者的中文 Agent 工程实战教程。使用 TypeScript、Vue 3 与 Fastify，边学习 Agent 核心能力，边完成一个可验证的 AI 技术研究助手。
 
-> **持续更新中：** 当前已完成工程基线、第 1 章、Vue 与 Fastify 启动链路，以及基于 VitePress 的本地教程站。Prompt、Tool Calling、RAG、Memory、Workflow 和 Evaluation 将按路线图逐步实现，不把规划中的能力描述成已完成功能。
+> **持续更新中：** 已完成工程基线、Vue 与 Fastify 启动链路、本地教程站和前两章。第 2 章提供模型调用 CLI 和历史消息对照实验。
 
 ## 适合谁
 
@@ -29,6 +29,7 @@
 - [x] Vue 3 工作台与 Fastify 健康检查
 - [x] 第 1 章：从前端应用走向 Agent 应用
 - [x] VitePress 2 本地教程站
+- [x] 第 2 章：用 TypeScript 调用千问 API
 - [ ] 模型运行时、Prompt 与 Context Engineering
 - [ ] Function Calling、工具治理与 MCP
 - [ ] RAG、知识库与 Memory
@@ -86,7 +87,8 @@ pnpm docs:dev
 1. 阅读 [第 1 章：从前端应用走向 Agent 应用](./docs/tutorials/01-from-frontend-to-agent.md)。
 2. 使用 `chapter-02-start` 的 pnpm 11 工程基线创建练习分支，按第 1 章验证应用。
 3. 使用 `pnpm chapter:check -- 01` 验收章节结构与项目门禁。
-4. 遇到概念问题时查阅 [原理解释](./docs/explanations/README.md) 和 [参考资料](./docs/reference/README.md)。
+4. 继续阅读 [第 2 章](./docs/tutorials/02-call-qwen-with-typescript.md)，运行 `pnpm model:ask --compare` 观察历史消息如何进入下一次调用。
+5. 遇到概念问题时查阅 [原理解释](./docs/explanations/README.md) 和 [参考资料](./docs/reference/README.md)。
 
 ## 仓库结构
 
@@ -107,7 +109,7 @@ docs/                  教程、指南、解释和参考资料
 
 ## API Key 与费用
 
-第 1 章不需要 API Key，也不会产生模型费用。后续真实模型调用只在显式开启的 live test 或开发命令中执行。
+第 1 章和第 2 章的默认练习无需 API Key，费用为 ¥0。第 2 章通过 `pnpm model:ask --live "你的问题"` 显式调用千问。
 
 - 不要提交 `.env`、API Key、访问令牌或私有文档。
 - 默认测试使用 fixture，不应产生模型费用。

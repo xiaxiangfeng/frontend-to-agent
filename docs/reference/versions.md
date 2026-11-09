@@ -37,13 +37,14 @@
 
 ## 模型与接口
 
-阶段 01 不调用付费模型。模型 ID、百炼接口兼容参数和 Embedding 维度只在相应在线烟雾测试通过后记录，不能根据记忆猜测。
+第 2 章通过本地模拟响应验证百炼兼容 Chat 接口的请求与响应处理。在线调用按[第 2 章的配置说明](../tutorials/02-call-qwen-with-typescript.md)启用，已验证的在线模型和 Embedding 维度会在对应的在线验证完成后记录。
 
 ## 环境变量
 
 | 变量 | 用途 | 是否敏感 |
 | --- | --- | --- |
 | `DASHSCOPE_API_KEY` | 服务端调用阿里云百炼 | 是 |
+| `DASHSCOPE_BASE_URL` | 百炼业务空间的兼容 Chat 基础地址 | 否 |
 | `APP_ACCESS_TOKEN` | 保护实时研究模式 | 是 |
 | `QWEN_MODEL` | 文本生成模型 ID | 否 |
 | `QWEN_EMBEDDING_MODEL` | Embedding 模型 ID | 否 |

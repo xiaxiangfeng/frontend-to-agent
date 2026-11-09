@@ -21,6 +21,7 @@
     "docs:dev": "vitepress dev docs",
     "docs:preview": "vitepress preview docs",
     "lint": "eslint .",
+    "model:ask": "node packages/model-runtime/src/cli.ts",
     "test": "vitest run",
     "typecheck": "pnpm -r --if-present typecheck"
   },

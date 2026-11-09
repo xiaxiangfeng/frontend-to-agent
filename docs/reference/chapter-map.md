@@ -5,11 +5,11 @@
 | 章节 | 标题 | 阶段产物 | 起始 Tag | 结束 Tag |
 | --- | --- | --- | --- | --- |
 | 01 | 从前端应用到 Agent 应用 | Monorepo 与可运行 smoke app | `chapter-01-start` | `chapter-01-end` |
-| 02 | 用 TypeScript 调用千问 API | 最小模型调用 | `chapter-02-start` | `chapter-02-end` |
-| 03 | 消息、Token、流式与结构化输出 | 类型安全流式 CLI | `chapter-03-start` | `chapter-03-end` |
+| 02 | 用 TypeScript 调用千问 API | 模型调用 CLI 与历史消息对照 | `chapter-02-start` | `chapter-02-end` |
+| 03 | 保存会话，让 A 和 B 各自续聊 | 持久化多轮 API 与用户隔离 | `chapter-03-start` | `chapter-03-end` |
 | 04 | 设计可维护的 System Prompt | 结构化研究计划 | `chapter-04-start` | `chapter-04-end` |
 | 05 | 组织、选择和压缩上下文 | 可解释 Context Builder | `chapter-05-start` | `chapter-05-end` |
-| 06 | 管理上下文窗口、成本与模型错误 | 重试与预算保护 | `chapter-06-start` | `chapter-06-end` |
+| 06 | 管理上下文窗口、成本与模型错误 | 流式回复、重试与预算保护 | `chapter-06-start` | `chapter-06-end` |
 | 07 | 从零实现 Function Calling | 经验证的工具调用 | `chapter-07-start` | `chapter-07-end` |
 | 08 | 构建类型安全的工具注册系统 | 权限化 ToolRuntime | `chapter-08-start` | `chapter-08-end` |
 | 09 | 实现 Agent 循环与错误恢复 | 有停止条件的原生循环 | `chapter-09-start` | `chapter-09-end` |
