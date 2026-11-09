@@ -31,7 +31,7 @@ describe('local documentation site', () => {
   test('allows only the esbuild install script required by the toolchain', () => {
     const workspace = requiredText('pnpm-workspace.yaml')
 
-    expect(workspace).toMatch(/onlyBuiltDependencies:\r?\n\s+- esbuild/)
+    expect(workspace).toMatch(/allowBuilds:\r?\n\s+esbuild: true\s*$/)
   })
   test('site config fixes the port and exposes all four documentation types', () => {
     const config = requiredText('docs/.vitepress/config.mts')

@@ -15,7 +15,7 @@ test('root package exposes the workspace quality commands', () => {
   const packageJson = JSON.parse(requiredText('package.json'))
 
   assert.equal(packageJson.private, true)
-  assert.match(packageJson.packageManager, /^pnpm@10\./)
+  assert.match(packageJson.packageManager, /^pnpm@11\./)
   assert.match(packageJson.engines.node, /24/)
   assert.deepEqual(
     Object.keys(packageJson.scripts).sort(),

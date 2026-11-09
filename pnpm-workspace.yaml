@@ -2,5 +2,9 @@ packages:
   - 'apps/*'
   - 'packages/*'
 
-onlyBuiltDependencies:
-  - esbuild
+engineStrict: true
+saveExact: true
+strictPeerDependencies: true
+
+allowBuilds:
+  esbuild: true

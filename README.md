@@ -40,7 +40,7 @@
 
 ## 技术栈
 
-- Node.js 24、TypeScript 5.9、pnpm 10
+- Node.js 24、TypeScript 5.9、pnpm 11
 - Vue 3、Vite 8
 - Fastify
 - Vitest、ESLint
@@ -84,7 +84,7 @@ pnpm docs:dev
 ## 从哪里开始
 
 1. 阅读 [第 1 章：从前端应用走向 Agent 应用](./docs/tutorials/01-from-frontend-to-agent.md)。
-2. 使用 `chapter-01-start` 创建练习分支，按教程完成代码。
+2. 使用 `chapter-02-start` 的 pnpm 11 工程基线创建练习分支，按第 1 章验证应用。
 3. 使用 `pnpm chapter:check -- 01` 验收章节结构与项目门禁。
 4. 遇到概念问题时查阅 [原理解释](./docs/explanations/README.md) 和 [参考资料](./docs/reference/README.md)。
 

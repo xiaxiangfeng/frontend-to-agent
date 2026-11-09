@@ -5,10 +5,10 @@
   "description": "面向前端开发者的中文 Agent 工程实战教程与研究助手示例",
   "license": "MIT",
   "type": "module",
-  "packageManager": "pnpm@10.13.1",
+  "packageManager": "pnpm@11.25.0",
   "engines": {
     "node": ">=24.0.0 <25",
-    "pnpm": ">=10.13.1 <11"
+    "pnpm": ">=11.25.0 <12"
   },
   "scripts": {
     "build": "pnpm -r --if-present build",

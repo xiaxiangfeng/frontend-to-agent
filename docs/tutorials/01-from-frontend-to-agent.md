@@ -32,7 +32,7 @@ flowchart LR
 ## 前置条件
 
 - 熟悉 JavaScript、TypeScript、组件、HTTP 请求和 `package.json`；
-- 安装 [已验证版本](../reference/versions.md) 中的 Node.js 24 与 pnpm 10；
+- 安装 [已验证版本](../reference/versions.md) 中的 Node.js 24 与 pnpm 11；
 - 已取得本仓库代码；
 - 本章不需要 `DASHSCOPE_API_KEY`，费用为 **¥0**。
 
@@ -43,14 +43,14 @@ node --version
 pnpm --version
 ```
 
-本教程验证时使用 Node.js `24.13.0` 和 pnpm `10.13.1`。如果使用其他大版本，报错时先对齐版本再排查代码。
+当前验证环境使用 Node.js `24.20.0` 和 pnpm `11.25.0`。
 
 ## 起始代码检查点
 
-每一章都有可复现的 Git 起点。为避免污染自己的主分支，可以从本章起点创建练习分支：
+`chapter-02-start` 保存了使用 pnpm 11 的工程基线。可以从这个检查点创建练习分支，复跑第 1 章的应用。原始检查点见[章节表](../reference/chapter-map.md)。
 
 ```text
-git switch -c learn/chapter-01 chapter-01-start
+git switch -c learn/chapter-01 chapter-02-start
 pnpm install --frozen-lockfile
 ```
 
@@ -171,7 +171,7 @@ Prompt、Function Calling 和 RAG 很关键，但并不是全部。一个可交�
 
 | 步骤 | 验证方式 | 成功信号 |
 | --- | --- | --- |
-| 环境准备 | `node --version`、`pnpm --version` | 大版本分别为 24 与 10 |
+| 环境准备 | `node --version`、`pnpm --version` | 大版本分别为 24 与 11 |
 | 安装依赖 | `pnpm install --frozen-lockfile` | lockfile 未被改写且命令退出码为 0 |
 | 理解边界 | 找出 Vue、Fastify 与 `research-core` 的方向 | 领域包不依赖 UI 或 HTTP 框架 |
 | API smoke | 请求 `/health/live` | 返回 `{ "status": "ok" }` |
