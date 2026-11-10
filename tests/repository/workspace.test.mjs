@@ -52,6 +52,9 @@ test('example environment is safe and complete', () => {
     'QWEN_MODEL',
     'QWEN_EMBEDDING_MODEL',
     'APP_ACCESS_TOKEN',
+    'CHAT_DEMO_TOKEN_A',
+    'CHAT_DEMO_TOKEN_B',
+    'CHAT_MODEL_MODE',
     'DATABASE_URL',
     'QDRANT_URL',
     'RUN_LIVE_TESTS'
@@ -63,6 +66,7 @@ test('example environment is safe and complete', () => {
 
   assert.doesNotMatch(example, /sk-[A-Za-z0-9]{12,}/)
   assert.doesNotMatch(example, /DASHSCOPE_API_KEY=\S+/)
+  assert.doesNotMatch(example, /CHAT_DEMO_TOKEN_[AB]=\S+/)
 })
 
 assert.ok(repositoryRoot)

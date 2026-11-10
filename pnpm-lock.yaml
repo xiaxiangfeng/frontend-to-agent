@@ -32,6 +32,15 @@ importers:
 
   apps/api:
     dependencies:
+      '@agent-book/model-runtime':
+        specifier: workspace:*
+        version: link:../../packages/model-runtime
+      '@agent-book/persistence':
+        specifier: workspace:*
+        version: link:../../packages/persistence
+      '@agent-book/research-core':
+        specifier: workspace:*
+        version: link:../../packages/research-core
       fastify:
         specifier: 5.12.1
         version: 5.12.1
@@ -73,9 +82,17 @@ importers:
 
   packages/model-runtime: {}
 
-  packages/persistence: {}
+  packages/persistence:
+    dependencies:
+      '@agent-book/research-core':
+        specifier: workspace:*
+        version: link:../research-core
 
-  packages/research-core: {}
+  packages/research-core:
+    dependencies:
+      '@agent-book/model-runtime':
+        specifier: workspace:*
+        version: link:../model-runtime
 
   packages/tool-runtime: {}
 

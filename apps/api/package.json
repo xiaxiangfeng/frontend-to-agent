@@ -5,12 +5,15 @@
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "dev": "tsx watch src/server.ts",
+    "dev": "tsx watch --conditions=development src/server.ts",
     "start": "node dist/server.js",
     "test": "vitest run",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
+    "@agent-book/model-runtime": "workspace:*",
+    "@agent-book/persistence": "workspace:*",
+    "@agent-book/research-core": "workspace:*",
     "fastify": "5.12.1"
   },
   "devDependencies": {

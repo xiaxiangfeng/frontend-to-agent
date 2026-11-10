@@ -21,7 +21,7 @@ describe('local application development commands', () => {
   test('api watches its TypeScript entry point with an exact tsx version', () => {
     const packageJson = readJson('apps/api/package.json')
 
-    expect(packageJson.scripts.dev).toBe('tsx watch src/server.ts')
+    expect(packageJson.scripts.dev).toBe('tsx watch --conditions=development src/server.ts')
     expect(packageJson.devDependencies.tsx).toBe('4.23.12')
   })
 })

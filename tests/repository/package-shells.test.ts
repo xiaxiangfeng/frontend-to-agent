@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import { describe, expect, test } from 'vitest'
 
 const repositoryRoot = fileURLToPath(new URL('../../', import.meta.url))
+const developmentPackages = new Set(['research-core', 'model-runtime', 'persistence'])
 const packageNames = [
   'research-core',
   'model-runtime',
@@ -25,6 +26,9 @@ describe.each(packageNames)('@agent-book/%s package shell', (packageName) => {
 
     const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf8'))
     expect(packageJson.name).toBe(`@agent-book/${packageName}`)
-    expect(packageJson.exports).toEqual({ '.': './dist/index.js' })
+    const entry = developmentPackages.has(packageName)
+      ? { types: './src/index.ts', development: './src/index.ts', default: './dist/index.js' }
+      : './dist/index.js'
+    expect(packageJson.exports).toEqual({ '.': entry })
   })
 })

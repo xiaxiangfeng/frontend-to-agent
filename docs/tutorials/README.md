@@ -6,5 +6,6 @@
 
 1. [从前端应用走向 Agent 应用](./01-from-frontend-to-agent.md)
 2. [用 TypeScript 调用千问 API](./02-call-qwen-with-typescript.md)
+3. [保存会话，让 A 和 B 各自续聊](./03-persist-conversations.md)
 
 新章节必须从 [_chapter-template.md](./_chapter-template.md) 开始，并通过 `pnpm chapter:check -- <章节编号>` 验收。

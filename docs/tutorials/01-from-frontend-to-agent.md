@@ -127,7 +127,7 @@ packages/
 先构建 API：
 
 ```text
-pnpm --filter @agent-book/api build
+pnpm --filter @agent-book/api... build
 pnpm --filter @agent-book/api start
 ```
 

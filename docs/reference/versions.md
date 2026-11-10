@@ -48,6 +48,8 @@
 | `APP_ACCESS_TOKEN` | 保护实时研究模式 | 是 |
 | `QWEN_MODEL` | 文本生成模型 ID | 否 |
 | `QWEN_EMBEDDING_MODEL` | Embedding 模型 ID | 否 |
-| `DATABASE_URL` | SQLite 连接位置 | 否 |
+| `CHAT_DEMO_TOKEN_A` / `CHAT_DEMO_TOKEN_B` | 本地会话演示用户的令牌 | 是 |
+| `CHAT_MODEL_MODE` | 会话模型模式，默认为 `fixture` | 否 |
+| `DATABASE_URL` | SQLite 文件位置，相对路径从仓库根目录解析 | 否 |
 | `QDRANT_URL` | Qdrant 服务地址 | 否 |
 | `RUN_LIVE_TESTS` | 显式允许付费在线测试 | 否 |
