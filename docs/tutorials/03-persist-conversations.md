@@ -2,16 +2,41 @@
 
 ## 本章目标
 
-把第 2 章的 `complete(messages)` 接进 Fastify。每次请求先确认用户和会话，再从 SQLite 读取该会话的历史。模型返回后，把本轮问题和回复一起保存。
-
-模型客户端和数据库连接可以在服务启动时创建一次。每次请求用身份和会话 ID 从数据库取数据，再创建自己的消息数组。服务重启后，Node 对象重新创建，SQLite 里的会话仍可以续接。
+让 A 和 B 用同一个聊天服务，各自接着自己的话题聊。服务把每轮提问和回复存进 SQLite，重启后还能用原来的会话 ID 继续聊。
 
 ## 完成后的可见结果
 
-- A 和 B 各自创建会话并交替发消息。A 追问「刚才我说了什么？」时，回复只使用 A 当前会话的历史。
-- B 用自己的凭据读或续接 A 的会话，接口返回 HTTP 404。
-- 保留会话 ID，重启 Node 服务后可以继续聊。
-- 同一会话的两条请求如果基于同一轮历史生成，先写入的成功，另一条返回 HTTP 409。
+在第 5 步的离线练习里，A 发「我在研究 Vue 响应式」，B 发「我在研究 Node 事件循环」。随后 A 回到原来的会话问「刚才我说了什么？」，会收到这句回复。
+
+```text
+上一条用户消息是「我在研究 Vue 响应式。」。
+```
+
+### A 追问时，服务怎么找回历史
+
+| 请求里的信息 | 服务用它做什么 |
+| --- | --- |
+| A 的访问令牌 | 认出这次请求来自 A。 |
+| 会话 ID（`conversationId`） | 找到 A 想继续聊的那段会话。 |
+| 本轮问题（`content`） | 放在发给模型的消息末尾。 |
+
+服务用 A 的身份和会话 ID 一起查 SQLite，读出这段会话的旧问答。和第 2 章的续聊实验一样，模型会在同一次请求里收到这段历史和新问题。
+
+<details>
+<summary>展开 A 追问时发给模拟模型的完整消息</summary>
+
+```json
+[
+  { "role": "system", "content": "你是一位技术研究助手，请用简短中文回答。" },
+  { "role": "user", "content": "我在研究 Vue 响应式。" },
+  { "role": "assistant", "content": "已收到，这是本会话的第一条消息。" },
+  { "role": "user", "content": "刚才我说了什么？" }
+]
+```
+
+</details>
+
+B 用自己的令牌读或续接 A 的会话，接口会返回 `404`。重启服务后，B 带上自己的令牌和原来的会话 ID 追问，回复仍会提到 Node 事件循环。
 
 ## 前置条件
 
@@ -54,6 +79,8 @@ pnpm install --frozen-lockfile
 
 `ConversationOwner` 包含 `tenantId` 与 `userId`，会话 ID 由服务端生成。一次回复先按这三项读取会话，创建新的 `messages` 数组，按顺序放入系统指令、该会话历史和用户新问题。
 
+模型客户端和数据库连接可以在服务启动时创建一次。每次生成回复时，服务单独查这段会话的历史，再组装 `messages`。
+
 ```text
 git restore --source=chapter-03-end --worktree -- packages/research-core/src/index.ts
 ```
@@ -72,11 +99,13 @@ git restore --source=chapter-03-end --worktree -- packages/persistence/src/index
 
 <<< ../../packages/persistence/src/index.ts
 
-版本是读取时已经保存的轮数，也就是下一轮的索引。写入语句同时核对归属和当前轮次，再一次插入两条消息的内容。`(conversation_id, turn_index)` 主键为每轮提供唯一约束。等待模型时数据库连接可以处理其他请求，写入时再核对版本。
+版本就是会话已保存的问答轮数。如果 A 已聊了 1 轮，两条请求可能同时读到这 1 轮历史。先保存成功的请求把轮数推进到 2。另一条请求保存时发现轮数已经变化，接口返回 `409`。
+
+写入语句会同时核对会话归属和轮数，一次保存本轮提问与回复。`(conversation_id, turn_index)` 主键保证每个会话的同一轮只存一条问答记录。
 
 ### 4. 在 Fastify 验证身份并挂载会话路由
 
-本章的本地身份映射由服务端配置。请求只带 `Authorization: Bearer <令牌>` 和会话 ID，租户与用户从令牌映射取得。SQL 查询和写入都使用这个身份。
+发送消息时，请求头 `Authorization` 带令牌，URL 带会话 ID，请求体带本轮 `content`。服务端从令牌查到 `tenantId` 和 `userId`，用这两个 ID 和会话 ID 查询历史、保存新一轮问答。
 
 ```text
 git restore --source=chapter-03-end --worktree -- apps/api/src/app.ts apps/api/src/conversations.ts apps/api/src/chat-config.ts apps/api/src/server.ts .env.example tests/repository/workspace.test.mjs

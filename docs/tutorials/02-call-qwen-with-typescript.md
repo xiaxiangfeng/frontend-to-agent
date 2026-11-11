@@ -2,7 +2,7 @@
 
 ## 本章目标
 
-用 Node.js 完成一次千问文本调用，读懂发出的 `messages` 和返回的文本、耗时、Token 用量。接着给同一个追问分别提供和省略上一轮消息，观察两次请求的上下文。
+用 TypeScript 把一个问题发给模型，在终端看到回复、耗时和 Token 用量。再用 Vue 响应式做例子，看看同一句追问带上上一轮问答后，会得到什么回复。
 
 ## 完成后的可见结果
 
@@ -11,7 +11,41 @@ pnpm model:ask "用一句话解释 Vue 响应式"
 pnpm model:ask --compare
 ```
 
-第一条命令输出一条回复和调用用量。第二条命令打印三次调用的 `messages`，让你核对「刚才的研究主题是什么？」在两组请求里分别得到了什么信息。默认模式使用模拟数据，费用为 ¥0。
+第一条命令会显示一条模拟回复、耗时和示例 Token 用量。默认练习在本地模拟千问响应，费用为 ¥0。
+
+第二条命令先发送「我的研究主题是 Vue 响应式。」，接着把同一句「刚才的研究主题是什么？」发两次。
+
+| 追问 | 发给模型的 `messages` | 终端里的模拟回复 |
+| --- | --- | --- |
+| A | 系统指令和本轮追问 | 这次请求没有提供研究主题。 |
+| B | 系统指令、上一轮的用户消息和助手回复、本轮追问 | 刚才的研究主题是 Vue 响应式。 |
+
+两次追问使用同一个模型客户端。程序给 B 组的 `messages` 加上了上一轮的两条消息，模拟模型就能从这次收到的内容里找到研究主题。
+
+<details>
+<summary>展开两次追问实际发出的消息</summary>
+
+**追问 A**
+
+```json
+[
+  {"role": "system", "content": "你是一位技术研究助手，请用简短中文回答。"},
+  {"role": "user", "content": "刚才的研究主题是什么？"}
+]
+```
+
+**追问 B**
+
+```json
+[
+  {"role": "system", "content": "你是一位技术研究助手，请用简短中文回答。"},
+  {"role": "user", "content": "我的研究主题是 Vue 响应式。"},
+  {"role": "assistant", "content": "收到，研究主题是 Vue 响应式。"},
+  {"role": "user", "content": "刚才的研究主题是什么？"}
+]
+```
+
+</details>
 
 ## 前置条件
 
@@ -49,40 +83,27 @@ pnpm exec vitest run packages/model-runtime/test
 | `user` | 提供用户问题或用户之前发过的消息 |
 | `assistant` | 把上一轮模型回复带到新的请求 |
 
-将下面的实现写入 `packages/model-runtime/src/index.ts`。在 GitHub 上阅读时，也可以用 `git show chapter-02-end:packages/model-runtime/src/index.ts` 查看同一份源码。
-
-<<< ../../packages/model-runtime/src/index.ts
+```text
+git restore --source=chapter-02-end --worktree -- packages/model-runtime/src/index.ts
+```
 
 `complete(messages)` 返回应用可以直接使用的结果。它从 `choices[0].message.content` 取文本，从 `usage` 读输入、输出和总 Token 数。服务没有给出可用用量时，返回 `null`。调用为非流式，收到完整回复后才返回。
 
 ### 2. 用命令行运行一次调用
 
-新增 `packages/model-runtime/src/cli.ts`。命令行负责读参数、提供消息、显示结果。`simulateFetch` 在本地返回一份兼容 Chat 格式的响应，这样读者可以复用步骤 1 的请求组装和解析逻辑。用 `git show chapter-02-end:packages/model-runtime/src/cli.ts` 也能查看源码。
+`cli.ts` 读取命令行的问题，组装成 `messages`，调用模型并打印结果。默认的 `simulateFetch` 在本地返回一份兼容 Chat 格式的响应，仍然走步骤 1 的请求组装和解析。
 
-<<< ../../packages/model-runtime/src/cli.ts
-
-在根目录 `package.json` 的 `scripts` 中加一项。
-
-```json
-"model:ask": "node packages/model-runtime/src/cli.ts"
+```text
+git restore --source=chapter-02-end --worktree -- packages/model-runtime/src/cli.ts packages/model-runtime/tsconfig.json package.json .env.example tests/repository/workspace.test.mjs
 ```
 
-在 `packages/model-runtime/tsconfig.json` 的 `compilerOptions` 中加入 `"rewriteRelativeImportExtensions": true`。CLI 用 Node.js 24 直接运行 TypeScript 源码，因此导入写成 `./index.ts`。包构建时 TypeScript 会把该导入改成 `./index.js`。
-
-在根目录 `.env.example` 中加入空白的 `DASHSCOPE_BASE_URL=`。把 `model:ask` 和 `DASHSCOPE_BASE_URL` 分别补进 `tests/repository/workspace.test.mjs` 的命令和环境变量清单。
+根目录的 `model:ask` 命令运行 `node packages/model-runtime/src/cli.ts`。CLI 用 Node.js 24 直接运行 TypeScript，导入写成 `./index.ts`。构建时，`rewriteRelativeImportExtensions` 会把该导入改成 `./index.js`。在线练习使用的 `DASHSCOPE_BASE_URL` 已放进 `.env.example`。
 
 ### 3. 对照带历史和只带追问的请求
 
-执行 `pnpm model:ask --compare`。第一轮告诉模型研究主题是 Vue 响应式，程序把回复暂存到变量 `firstReply`。之后用同一个客户端和同一个追问构造两份消息。
+执行 `pnpm model:ask --compare`，在终端找到 A 和 B 各自的 `messages`。程序把第一轮回复存进 `firstReply`。组装 B 时，程序把原研究主题作为 `user` 消息，把 `firstReply` 作为 `assistant` 消息，再把本轮追问放在最后。
 
-| 请求 | 发出的 `messages` | 模拟回复 |
-| --- | --- | --- |
-| 追问 A | 系统指令、追问 | 这次请求没有提供研究主题 |
-| 追问 B | 系统指令、上一条用户消息、上一条助手回复、追问 | 刚才的研究主题是 Vue 响应式 |
-
-程序会打印实际传给适配器的数组。B 组多出前一轮的两条消息。两组模拟回复和用量由程序构造，用来验证输入差异。在线模型的措辞和用量以实际响应为准。
-
-客户端实例保存接口配置。应用把前一轮回复存在 `firstReply`，下一次调用时按需放进 `messages`。以后可以把完整历史存入数据库，通过 `conversationId` 找到会话，再从历史中挑选本轮需要的消息。随着对话变长，可以用近期消息和摘要来控制每轮输入的长度。
+第 3 章会把每轮问答存起来，下一次按会话 ID 找回并加入请求。对话变长后，后续章节会从历史里选出本轮需要的消息。
 
 ### 4. 可选练习，接入真实千问
 
@@ -136,8 +157,6 @@ pnpm build
 ## 延伸练习
 
 把追问 B 的 `assistant` 消息改成与本轮主题无关的内容。在线模式下观察模型如何处理冲突，并记录请求数组和实际回复。
-
-第 3 章会把本章的 `complete(messages)` 接入 Fastify，用会话 ID 读取各自的历史。两个用户可以分别创建会话、交替发送消息，再重启服务继续聊。
 
 ## 相关解释与参考
 

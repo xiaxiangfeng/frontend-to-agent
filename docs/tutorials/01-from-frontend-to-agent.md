@@ -2,32 +2,18 @@
 
 ## 本章目标
 
-这一章不急着调用大模型。我们先把熟悉的前端开发心智模型迁移到 Agent 工程：分清聊天界面、Workflow 与 Agent，认识项目各层的职责，并跑通 Vue 3、Fastify 和共享包组成的学习基线。完成后，你会知道后续的 Prompt、Function Calling、RAG、Memory 与 Evaluation 分别应该进入哪一层，而不是把所有逻辑塞进聊天组件。
+在本地跑起技术研究助手的网页和 API，认识接下来写代码会用到的目录。后面的模型调用、会话保存和资料检索都会在这套项目结构上继续做。
 
 ## 完成后的可见结果
 
-你将得到三个可以直接观察的结果：
+装好依赖后，在仓库根目录运行 `pnpm dev`，可以同时启动 Vue 页面和 Fastify API。
 
-- 浏览器显示“AI 技术研究助手”和当前阶段说明；
-- Fastify 的 `GET /health/live` 返回 `{ "status": "ok" }`；
-- 仓库的 lint、类型检查、测试、文档检查与生产构建全部通过，且不产生模型费用。
+| 打开的地址 | 看到的结果 |
+| --- | --- |
+| `http://localhost:5173` | 页面标题「AI 技术研究助手」和当前阶段说明。 |
+| `http://127.0.0.1:3000/health/live` | `{ "status": "ok" }`，说明 API 进程能接收请求并返回 JSON。 |
 
-当前阶段的系统边界如下：
-
-```mermaid
-flowchart LR
-  User[用户] --> Web[Vue 3 研究工作台]
-  Web --> API[Fastify API]
-  API --> Core[research-core\n领域规则]
-  Core --> Model[model-runtime\n模型适配]
-  Core --> Tools[tool-runtime\n工具执行]
-  Core --> Knowledge[knowledge-base\n检索与证据]
-  Core --> State[persistence\n状态与检查点]
-  Core -. 后续框架适配 .-> Graph[agent-langgraph]
-  Core -. 质量反馈 .-> Evals[evals]
-```
-
-实线表示最终产品的主要调用方向，虚线表示后续章节才会接入的适配与评测能力。第 1 章只验证外壳和边界，不调用真实模型。
+如果启动日志显示了不同端口，使用日志里的地址。看完可以按 `Ctrl+C` 停止服务，再跟着下面的步骤练习。
 
 ## 前置条件
 
@@ -64,9 +50,9 @@ pnpm test
 
 ## 实现步骤
 
-### 1. 把前端心智模型映射到 Agent 工程
+### 1. 看前端、应用和模型各做什么
 
-前端应用通常是“事件触发确定的处理逻辑”。Agent 应用保留了这些工程基础，但把一部分下一步决策交给模型，并用代码约束模型可以看到什么、选择什么以及何时停止。
+后面的评审任务会比较项目 A 和 B 怎么导入文档、怎么在回答里标明资料出处。Vue 页面负责提交任务、展示进度和报告。应用保存已经查到的资料，并提供读取 README 的工具。模型根据已有资料提出下一步查什么，应用检查请求后执行。
 
 | 前端概念 | Agent 工程中的对应概念 | 仍由谁负责 |
 | --- | --- | --- |
@@ -79,17 +65,15 @@ pnpm test
 | DevTools 与埋点 | Trace / Evaluation | 应用记录并评测 |
 | 页面组件 | Vue 工作台 | 只负责交互与展示 |
 
-这里最重要的分界是：**模型提出下一步行动，应用验证并执行行动**。模型输出不是可信命令，也不是业务事实。
-
 ### 2. 区分聊天框、Workflow 与 Agent
 
-三者都可能使用大模型，但控制流不同：
+| 方式 | 比较项目 A 和 B 时会发生什么 |
+| --- | --- |
+| 聊天框 | 用户问「两个项目怎么导入文档？」，模型根据收到的消息回答。 |
+| Workflow | 开发者写好读 A 的 README、读 B 的 README、整理对照表的步骤，程序按顺序执行。 |
+| Agent | 模型发现 B 的 README 缺少导入细节，提出再读 B 的导入文档。应用检查并执行，再把结果交回模型。 |
 
-- 聊天框：用户输入一次，模型回答一次；
-- Workflow：开发者预先写好固定步骤，模型只完成其中某些节点；
-- Agent：模型在受约束的循环中，根据目标与观察结果选择下一步行动，直到完成、失败或触发停止条件。
-
-一个最小 Agent 循环可以先用伪代码理解：
+Agent 可以重复提出行动，直到任务完成或达到步数上限。
 
 ```ts
 while (!state.done && state.steps < state.maxSteps) {
@@ -100,7 +84,7 @@ while (!state.done && state.steps < state.maxSteps) {
 }
 ```
 
-真正困难的部分并不是 `while`，而是上下文构建、结构校验、工具权限、停止条件、状态恢复、可观测性和评测。它们也是本书后续章节的主线。
+`validateDecision` 检查模型提出的行动。`recordObservation` 把工具结果记进状态，供下一次决定用。
 
 ### 3. 认识仓库边界
 
@@ -122,6 +106,26 @@ packages/
 
 这套边界遵循一个简单规则：Vue 组件和 Fastify 路由可以调用领域能力，领域规则不能反过来依赖 UI 或 Web 框架。这样我们可以先用原生 TypeScript 理解 Agent，再在后期接入 LangGraph，而不必重写产品核心。
 
+<details>
+<summary>展开后续章节的调用关系</summary>
+
+第 1 章先启动 Vue 页面和 Fastify API。图中的调用关系会在后续章节逐步接上。
+
+```mermaid
+flowchart LR
+  User[用户] --> Web[Vue 3 研究工作台]
+  Web --> API[Fastify API]
+  API --> Core[research-core\n领域规则]
+  Core --> Model[model-runtime\n模型适配]
+  Core --> Tools[tool-runtime\n工具执行]
+  Core --> Knowledge[knowledge-base\n检索与证据]
+  Core --> State[persistence\n状态与检查点]
+  Core -. 后续框架适配 .-> Graph[agent-langgraph]
+  Core -. 质量反馈 .-> Evals[evals]
+```
+
+</details>
+
 ### 4. 跑通 Fastify 健康检查
 
 先构建 API：
@@ -131,13 +135,7 @@ pnpm --filter @agent-book/api... build
 pnpm --filter @agent-book/api start
 ```
 
-保持这个终端运行，在另一个 PowerShell 终端请求：
-
-```text
-Invoke-RestMethod http://127.0.0.1:3000/health/live
-```
-
-预期看到 `status` 为 `ok`。这个端点只证明进程能够启动并响应，不代表模型、数据库或向量库已经就绪。
+保持这个终端运行，在浏览器打开 `http://127.0.0.1:3000/health/live`。看到 `{ "status": "ok" }`，就说明 Fastify 已启动并能响应请求。
 
 ### 5. 跑通 Vue 工作台
 
@@ -147,11 +145,14 @@ Invoke-RestMethod http://127.0.0.1:3000/health/live
 pnpm --filter @agent-book/web dev
 ```
 
-打开终端显示的本地地址，通常是 `http://localhost:5173`。页面应显示“AI 技术研究助手”。当前页面是 smoke app，它的职责是给后续能力提供可见载体，而不是假装已经完成了 Agent。
+打开终端显示的本地地址，通常是 `http://localhost:5173`。页面应显示「AI 技术研究助手」。后续会在这个页面展示研究任务的进度和结果。
 
-### 6. 理解本书的增量路线
+### 6. 看接下来会做什么
 
-接下来的能力按依赖关系逐层增加：
+第 2 章先从 TypeScript 发出一次模型请求。第 3 章把每轮问答存起来，让不同用户各自续聊。到第 4 章，模型会为上面比较项目 A 和 B 的任务生成研究计划。
+
+<details>
+<summary>展开全书的学习顺序</summary>
 
 ```mermaid
 flowchart LR
@@ -165,7 +166,7 @@ flowchart LR
   HITL --> Eval[Trace / Evaluation / 安全 / 成本]
 ```
 
-Prompt、Function Calling 和 RAG 很关键，但并不是全部。一个可交付的 Agent 还需要状态、记忆、工作流、工具治理、失败恢复、人工审批、可观测性、评测、安全和成本控制。
+</details>
 
 ## 每一步的验证方式
 
