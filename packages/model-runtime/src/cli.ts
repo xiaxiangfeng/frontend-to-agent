@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs'
 import { loadEnvFile } from 'node:process'
 import { parseArgs } from 'node:util'
-import { createQwenModel, type ChatMessage, type ChatModel, type QwenModelOptions } from './index.ts'
+import { createQwenModel, qwenOptionsFromEnvironment, type ChatMessage, type ChatModel, type QwenModelOptions } from './index.ts'
 
 const system: ChatMessage = { role: 'system', content: '你是一位技术研究助手，请用简短中文回答。' }
 const topic: ChatMessage = { role: 'user', content: '我的研究主题是 Vue 响应式。' }
@@ -27,13 +27,7 @@ const simulateFetch: typeof fetch = async (_url, request) => {
 
 function readLiveOptions (): QwenModelOptions {
   if (existsSync('.env')) loadEnvFile()
-  const apiKey = process.env.DASHSCOPE_API_KEY?.trim()
-  const baseUrl = process.env.DASHSCOPE_BASE_URL?.trim()
-  const model = process.env.QWEN_MODEL?.trim()
-  if (!apiKey || !baseUrl || !model) {
-    throw new Error('请设置 DASHSCOPE_API_KEY、DASHSCOPE_BASE_URL 和 QWEN_MODEL。')
-  }
-  return { apiKey, baseUrl, model }
+  return qwenOptionsFromEnvironment(process.env)
 }
 
 async function ask (model: ChatModel, messages: ChatMessage[], label?: string): Promise<string> {

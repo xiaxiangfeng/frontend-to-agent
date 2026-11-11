@@ -31,6 +31,7 @@ test('root package exposes the workspace commands', () => {
       'docs:preview',
       'lint',
       'model:ask',
+      'research:plan',
       'test',
       'typecheck'
     ]

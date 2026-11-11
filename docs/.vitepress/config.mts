@@ -27,7 +27,8 @@ export default defineConfig({
             { text: '阅读说明', link: '/tutorials/README' },
             { text: '第 1 章：从前端应用走向 Agent 应用', link: '/tutorials/01-from-frontend-to-agent' },
             { text: '第 2 章：用 TypeScript 调用千问 API', link: '/tutorials/02-call-qwen-with-typescript' },
-            { text: '第 3 章：保存会话，让 A 和 B 各自续聊', link: '/tutorials/03-persist-conversations' }
+            { text: '第 3 章：保存会话，让 A 和 B 各自续聊', link: '/tutorials/03-persist-conversations' },
+            { text: '第 4 章：设计可维护的 System Prompt', link: '/tutorials/04-maintainable-system-prompt' }
           ]
         }
       ],

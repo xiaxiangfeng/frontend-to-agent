@@ -18,14 +18,29 @@ export interface ModelReply {
   finishReason: string | null
 }
 
+export interface ChatCompletionOptions {
+  responseFormat?: 'json'
+  maxOutputTokens?: number
+}
+
 export interface ChatModel {
-  complete (messages: readonly ChatMessage[]): Promise<ModelReply>
+  complete (messages: readonly ChatMessage[], options?: ChatCompletionOptions): Promise<ModelReply>
 }
 
 export interface QwenModelOptions {
   baseUrl: string
   apiKey: string
   model: string
+}
+
+export function qwenOptionsFromEnvironment (env: NodeJS.ProcessEnv): QwenModelOptions {
+  const apiKey = env.DASHSCOPE_API_KEY?.trim()
+  const baseUrl = env.DASHSCOPE_BASE_URL?.trim()
+  const model = env.QWEN_MODEL?.trim()
+  if (!apiKey || !baseUrl || !model) {
+    throw new Error('请设置 DASHSCOPE_API_KEY、DASHSCOPE_BASE_URL 和 QWEN_MODEL。')
+  }
+  return { apiKey, baseUrl, model }
 }
 
 function asRecord (value: unknown): Record<string, unknown> | null {
@@ -55,7 +70,7 @@ export function createQwenModel (options: QwenModelOptions, transport: typeof fe
   endpoint.pathname = path + '/chat/completions'
 
   return {
-    async complete (messages) {
+    async complete (messages, completion) {
       const startedAt = performance.now()
       const signal = AbortSignal.timeout(30_000)
       const response = await transport(endpoint, {
@@ -69,7 +84,8 @@ export function createQwenModel (options: QwenModelOptions, transport: typeof fe
           messages,
           stream: false,
           enable_thinking: false,
-          max_completion_tokens: 256
+          max_completion_tokens: completion?.maxOutputTokens ?? 256,
+          response_format: completion?.responseFormat === 'json' ? { type: 'json_object' } : undefined
         }),
         signal,
         redirect: 'error'

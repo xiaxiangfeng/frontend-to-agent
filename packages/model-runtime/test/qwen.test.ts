@@ -22,7 +22,7 @@ test('sends the selected messages and exposes the provider token counts', async 
   expect(String(url)).toBe('https://example.cn-beijing.maas.aliyuncs.com/compatible-mode/v1/chat/completions')
   expect(request?.method).toBe('POST')
   expect(new Headers(request?.headers).get('authorization')).toBe('Bearer test-key')
-  expect(JSON.parse(String(request?.body))).toMatchObject({
+  expect(JSON.parse(String(request?.body))).toEqual({
     model: options.model,
     messages,
     enable_thinking: false,
@@ -33,6 +33,24 @@ test('sends the selected messages and exposes the provider token counts', async 
     text: 'Vue 会追踪响应式数据的依赖。',
     finishReason: 'stop',
     usage: { inputTokens: 28, outputTokens: 12, totalTokens: 40 }
+  })
+})
+
+test('requests a JSON object and a larger output budget for a research plan', async () => {
+  const transport = vi.fn<typeof fetch>().mockResolvedValue(Response.json({
+    choices: [{ message: { content: '{}' }, finish_reason: 'stop' }]
+  }))
+
+  await createQwenModel(options, transport).complete([
+    { role: 'system', content: '请输出 JSON。' },
+    ...messages
+  ], { responseFormat: 'json', maxOutputTokens: 1024 })
+
+  const request = transport.mock.calls[0]?.[1]
+  expect(JSON.parse(String(request?.body))).toMatchObject({
+    response_format: { type: 'json_object' },
+    max_completion_tokens: 1024,
+    enable_thinking: false
   })
 })
 

@@ -2,7 +2,7 @@
 
 面向前端开发者的中文 Agent 工程实战教程。使用 TypeScript、Vue 3 与 Fastify，边学习 Agent 核心能力，边完成一个可验证的 AI 技术研究助手。
 
-> **持续更新中：** 已完成工程基线、本地教程站和前三章。第 2 章提供模型调用 CLI，第 3 章通过 Fastify 和 SQLite 实现多轮会话及用户隔离。
+> **持续更新中**。已完成工程基线、本地教程站和前四章。可以调用千问、保存隔离的多轮会话，并生成可校验的开源项目评审计划。
 
 ## 适合谁
 
@@ -31,6 +31,7 @@
 - [x] VitePress 2 本地教程站
 - [x] 第 2 章：用 TypeScript 调用千问 API
 - [x] 第 3 章：保存会话，让 A 和 B 各自续聊
+- [x] 第 4 章：设计可维护的 System Prompt
 - [ ] 模型运行时、Prompt 与 Context Engineering
 - [ ] Function Calling、工具治理与 MCP
 - [ ] RAG、知识库与 Memory
@@ -90,7 +91,8 @@ pnpm docs:dev
 3. 使用 `pnpm chapter:check -- 01` 验收章节结构与项目门禁。
 4. 继续阅读 [第 2 章](./docs/tutorials/02-call-qwen-with-typescript.md)，运行 `pnpm model:ask --compare` 观察历史消息如何进入下一次调用。
 5. 跟着 [第 3 章](./docs/tutorials/03-persist-conversations.md) 启动会话 API，验证用户隔离和重启续聊。
-6. 遇到概念问题时查阅 [原理解释](./docs/explanations/README.md) 和 [参考资料](./docs/reference/README.md)。
+6. 运行 `pnpm research:plan`，生成包含来源和完成条件的开源项目评审计划。 [第 4 章](./docs/tutorials/04-maintainable-system-prompt.md)
+7. 遇到概念问题时查阅 [原理解释](./docs/explanations/README.md) 和 [参考资料](./docs/reference/README.md)。
 
 ## 仓库结构
 
@@ -111,7 +113,7 @@ docs/                  教程、指南、解释和参考资料
 
 ## API Key 与费用
 
-前 3 章的默认练习无需 API Key，费用为 ¥0。第 2 章通过 `pnpm model:ask --live "你的问题"` 显式调用千问。第 3 章的会话 API 通过 `CHAT_MODEL_MODE=qwen` 开启在线模式。
+前 4 章的默认练习无需 API Key，费用为 ¥0。第 2 章通过 `pnpm model:ask --live "你的问题"` 调用千问。第 3 章通过 `CHAT_MODEL_MODE=qwen` 开启会话 API 的在线模式。第 4 章通过 `pnpm research:plan --live` 生成在线计划。
 
 - 不要提交 `.env`、API Key、访问令牌或私有文档。
 - 默认测试使用 fixture，不应产生模型费用。
