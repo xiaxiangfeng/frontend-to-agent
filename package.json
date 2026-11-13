@@ -22,6 +22,7 @@
     "docs:preview": "vitepress preview docs",
     "lint": "eslint .",
     "model:ask": "node packages/model-runtime/src/cli.ts",
+    "research:context": "node packages/research-core/src/context-cli.ts",
     "research:plan": "node --conditions=development packages/research-core/src/plan-cli.ts",
     "test": "vitest run",
     "typecheck": "pnpm -r --if-present typecheck"
