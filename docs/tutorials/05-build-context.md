@@ -2,31 +2,57 @@
 
 ## 本章目标
 
-第 4 章的计划要比较项目 A 和 B 的文档导入与引用方式。本章先处理其中一个问题「两个项目分别支持导入哪些文件？」。应用把这个问题、两份 README 的导入段落和本轮用得上的工具说明放到 `messages` 里。这些随请求交给模型看的内容，就是这一轮的上下文。
+第 4 章给项目 A 和 B 写了评审计划。本章沿用评审目标，用两道预设题练习怎么准备模型输入。比如问「两个项目分别支持导入哪些文件？」时，程序带上两份 README 的导入段落。旧评审笔记放不下时，就换成简短的摘要。这些准备交给模型看的内容，就是这一轮的上下文。
 
 ## 完成后的可见结果
 
-在仓库根目录运行 `pnpm research:context`。终端会对每道题显示两种输入的大小，并说明每项内容为什么保留、换成摘要或跳过。
+想先看结果，在包含第 5 章代码的分支运行 `pnpm research:context`。从本章起点动手时，在实现步骤的第 4 步运行。命令在本地组装消息，默认打印大小和选择记录。练习费用为 ¥0。
 
-| 本轮问题 | 保留的 README 段落 | 全量消息 | 按需组装 |
+| 本轮问题 | 保留的 README 段落 | 全部候选内容 | 筛选后的内容 |
 | --- | --- | ---: | ---: |
 | 项目 A 和 B 分别支持导入哪些文件？ | A 的「文档导入」和 B 的「添加资料」 | 2405 字节 | 1182 字节 |
 | 项目 A 和 B 怎么在回答里标明资料出处？ | A 的「引用」和 B 的「来源」 | 2411 字节 | 1192 字节 |
 
-拿第一题来说，A 的导入段落列出 Markdown 和 PDF，B 的导入段落列出 Markdown 和纯文本。这两段都保留。工具说明里带上读段落和查文件格式的说明，跳过查引用示例的说明。旧研究笔记太长，就用一句话提醒模型给每条结论记下出处。
+终端的 `comparisons[0]` 对应第一题。`allInputBytes` 和 `selectedInputBytes` 对应表里的两个大小。看 `decisions` 可以知道每一项怎么处理。
 
-这里的项目、README 段落和工具说明都是离线练习数据。命令组装消息并显示结果，练习费用为 ¥0。字节数来自 `messages` 序列化后的 UTF-8 大小，方便比较两份输入。实际调用的 Token 用量以模型服务返回的数据为准。
+| 条目 | 终端里的 `action` / `reason` | 为什么 |
+| --- | --- | --- |
+| `a-import` | `included` / `required` | 要回答 A 支持哪些文件，必须带上 A 的导入段落。 |
+| `a-citation` | `skipped` / `unrelated` | A 的引用说明和这道文件格式题无关。 |
+| `review-notes` | `summarized` / `budget` | 旧评审笔记的原文放不下，改用摘要。 |
+
+### 怎么读 `user` 消息里的内容
+
+应用把这次要问的事和参考资料装进 `user` 消息。`goal` 是总任务「评审项目 A 和 B」，`question` 是眼下要答的问题「分别支持导入哪些文件？」，`context` 是程序为这道题选出来的资料和说明。
+
+`context` 里的每一项都有编号 `id`、类型 `kind` 和正文 `text`。比如 `a-import` 的 `kind` 是 `evidence`，表示这段文字是用来回答问题的资料。
+
+| `kind` 的值 | 给模型看的内容 |
+| --- | --- |
+| `evidence` | 两份示例 README 的导入段落。A 支持 Markdown 和 PDF，B 支持 Markdown 和纯文本。 |
+| `history` | 之前的评审约定或笔记摘要，例如每条结论要记下出处。 |
+| `tool` | 预先写好的工具说明。例如 `read_document` 将来可以按资料 ID 和标题读取段落。 |
+
+模型通常能结合字段名和值理解含义。比如 `question` 里是一句问话，`kind` 的值是 `evidence`，旁边的 `text` 是 README 段落。像这样的字段可以直接用。项目专用的缩写可以补一句解释。
+
+System Prompt 要写清怎么用这些资料。比如可以把「根据提供的资料回答当前问题」具体写成「只根据 `kind` 为 `evidence` 的段落回答。每条结论注明 README 和段落标题。资料没说明的地方标为待核实。」
+
+用这两段资料，可以写出这样的示例回答。
+
+> 项目 A 支持 Markdown 和 PDF（A 的 README「文档导入」）。项目 B 支持 Markdown 和纯文本（B 的 README「添加资料」）。B 是否支持 PDF，待核实。
+
+两份段落已经提前写在练习数据里。工具说明作为候选内容，用来练习保留查文件格式的说明、跳过查引用示例的说明。到第 7 章接入工具调用后，模型才可以请求读取段落，由应用执行并把结果发回模型。
 
 <details>
 <summary>展开第一题组装出的两条消息</summary>
 
-执行 `pnpm research:context --messages` 可以看到全量和按需组装的 `messages`。第一题按需组装的 `system` 内容如下。
+执行 `pnpm research:context --messages` 后，在 `comparisons[0]` 里可以看到 `allMessages` 和 `selectedMessages`。下面展示的是 `selectedMessages` 里的两条消息。第一条的 `role` 是 `system`，`content` 是回答要求。
 
 ```text
 你是技术研究助手。根据提供的资料回答当前问题，标明出处。
 ```
 
-`user` 消息的 `content` 是一个 JSON 字符串，这里按缩进展示。
+第二条的 `role` 是 `user`。应用用 `JSON.stringify({ goal, question, context })` 生成它的 `content`，这里按 JSON 缩进展开。
 
 ```json
 {
@@ -98,30 +124,72 @@ pnpm exec vitest run packages/research-core/test/context-builder.test.ts
 
 ### 1. 先决定这道题需要什么
 
-应用给候选内容写上主题标签。文件格式题用 `import`，引用题用 `citation`。练习里的 `requiredIds` 是应用事先为每道题列出的必需项。文件格式题要同时有 A 和 B 的导入段落，还要带上读取段落与查文件格式的说明。主题标签用来筛选其余候选项。换到引用题，应用传入另一份必需清单和主题。
+开发者把两道题、示例 README 段落、工具说明和旧笔记写在 `context-fixture.ts`。文件格式题的 `topic` 是 `import`，`requiredIds` 包含 A 的「文档导入」`a-import`、B 的「添加资料」`b-import` 和本题需要的工具说明。程序用 `Map.get(id)` 取出这些条目，再检查其余条目的 `topics`。比如 `a-citation` 只有 `citation` 标签，换到引用题时才会用到。
 
 ```sh
 git restore --source=chapter-05-end --worktree -- packages/research-core/src/context-fixture.ts
 ```
 
-打开 `context-fixture.ts`，对照两道题的 `requiredIds` 和每条资料的 `topics`。以后接入检索时，可以把查到的段落作为候选内容交给这一步。
+第 4 章的 `sourceIds` 指整份 README，比如 `a-readme`。这章的 `requiredIds` 指已经挑好的具体条目，比如 `a-import`。`research:context` 从第 4 章的练习数据复用评审目标，本轮题目和要用的段落取自本章的练习数据。
+
+#### 以后怎么从真实 README 里找段落
+
+假设要回答「A 和 B 分别支持导入哪些文件？」，程序可以先按 `sourceIds` 把搜索范围限定在 A 和 B 的 README，再分别匹配标题或正文。比如查「导入」「上传」「支持」这样的关键词，可以找到 A 的「文档导入」和 B 的「添加资料」。已知准确标题时，可以直接按标题取段落。需要一次匹配几种字样时，也可以用 `/导入|上传/` 这样的正则。
+
+搜到段落后，程序把标题、正文和来源交给 Context Builder，由它按本轮问题和预算组装消息。以后接上工具时，同一段搜索逻辑也可以放在工具里，由模型提出要查什么，Node 在允许的资料里搜索。第 7 章会讲工具怎么调用，第 11、12 章会讲怎么切分文档和检索。 [章节安排](../reference/chapter-map.md)
 
 ### 2. 把必需项放进消息，再用预算筛选其余内容
 
-`assembleContext` 把评审目标、本轮问题和选中的内容放进 `user` 消息，再计算两条消息序列化后的大小。全量和按需组装走同一个函数，可以直接比较大小。
+`assembleContext` 把固定的回答要求放进 `system` 消息，把评审目标、本轮问题和选中的内容放进 `user` 消息。主题标签和必需清单供程序筛选用，消息里的每条资料只带 `id`、`kind`、`text`。
 
-`buildContext` 先放入必需项，再看其他条目的主题是否相关。相关条目的原文能放下，就保留原文。相关的旧研究记录放不下时，尝试用已写好的摘要替换，摘要也放不下就跳过。必需项缺失或超出预算时，程序报错，方便调用方调整输入。
+默认预算是 1300 字节，用来演示原文放不下、摘要能放下的情况。程序计算 `JSON.stringify(messages)` 的 UTF-8 字节数，包含 `system` 和 `user` 两条消息。全量消息用同样的算法计数，供比较大小。实际调用时，Token 用量看模型服务的返回值。
+
+`buildContext` 先放入必需项，缺一项或放不下就报错。剩下的条目按练习数据里的顺序处理。标签相关才试着放入，试放后整份消息还在预算内就保留。旧笔记放不下时，再试下一步的摘要。
 
 ```sh
 git restore --source=chapter-05-end --worktree -- packages/research-core/src/context-builder.ts
 pnpm exec vitest run packages/research-core/test/context-builder.test.ts -t 'keeps required inputs|cannot fit|missing required evidence'
 ```
 
-旧笔记的摘要提前写在 `summary` 里。程序在本轮组装时选择它，原文仍可供回看。后续做会话上下文时也可以用同样的办法，先带上这轮需要的消息，再决定是否用摘要代替较长的历史。
+### 3. 把放不下的旧笔记换成摘要
 
-### 3. 对照全量和按需组装
+文件格式题需要保留 A 和 B 的 README 导入段落。旧笔记 `review-notes` 则包含对照表列名、导入入口、引用界面和写建议的方法。本轮只需要保留一条评审约定，提醒模型按维度比较、给结论记下出处、标出待核实项。
 
-命令为每道题各组装一份全量消息和一份按需选择的消息。默认输入预算是 1300 字节，只对按需组装生效。`decisions` 记录每项结果。比如导入题的 `a-import` 是 `included / required`，`a-citation` 是 `skipped / unrelated`，`review-notes` 是 `summarized / budget`。
+这份笔记的原文占 807 字节，摘要占 101 字节。下面这句是程序选用的摘要，会放在 `review-notes` 的 `text` 里。
+
+> 按维度对照，每条结论记录 README 段落标题。资料没说明的地方标为待核实。
+
+<details>
+<summary>展开同一条笔记的原文</summary>
+
+```text
+上轮讨论了对照表的写法。对照表每行只比一个问题，例如是否支持 PDF 导入或怎样定位引用原文。项目名称、对照维度、证据和结论可以放在不同的列，读者可以逐项核对。
+记录导入能力时，先写清楚 README 明确列出的文件格式，再记下操作入口。若它只展示了一个上传例子，就在备注里写明示例覆盖的格式，并把完整支持范围留作待核实。
+记录引用能力时，把界面上显示的文字和点击后的行为分别写清楚。每条结论都保留 README 的段落标题。查不到的行为留到下一次试用时核对。
+写借鉴建议时，先列出两边已有的做法，说明它们对评审目标有什么帮助。整理报告前统一资料名称，补齐能找到的出处。
+```
+
+</details>
+
+本章的 `summary` 由开发者提前写进练习数据。`buildContext` 先试放原文，原文放不下时才试放摘要。程序只替换本轮 `messages` 里的 `text`，旧笔记的原文仍可回看。
+
+完成第 4 步后，运行下面的命令，再按表里的数字修改预算。看第一题的 `selectedMessages[1].content`，找到 `review-notes` 的 `text`，再用 `decisions` 核对程序的选择。
+
+```sh
+pnpm research:context --messages --max-input-bytes 1300
+```
+
+| 预算 | `review-notes` 放进消息的内容 | 本轮消息大小 |
+| ---: | --- | ---: |
+| 2405 字节 | 原文 | 1894 字节 |
+| 1300 字节 | 摘要 | 1182 字节 |
+| 1100 字节 | 剩余空间放不下摘要，跳过这一条 | 1020 字节 |
+
+在前两行，其他入选内容相同。笔记正文少了 706 字节，整份消息少了 712 字节。多出来的 6 字节来自原文的三个换行。笔记先转成 `user.content` 的 JSON 字符串，整份 `messages` 再转成 JSON，换行和反斜杠经过两次转义。即使预算调到 2405 字节，程序也会跳过与文件格式题无关的引用和安装说明。
+
+### 4. 对照全量和按需组装
+
+恢复命令行入口后，先看每道题的大小和选择记录，再加 `--messages` 检查组装出来的消息。
 
 ```sh
 git restore --source=chapter-05-end --worktree -- packages/research-core/src/context-cli.ts package.json tests/repository/workspace.test.mjs
@@ -129,15 +197,16 @@ pnpm research:context
 pnpm research:context --messages
 ```
 
-工具说明在这里是消息里的文本。到第 7 章，程序会把可调用工具的定义交给模型，收到调用请求后再执行。第 6 章先接模型的流式回复，并处理请求失败和输出预算。
+第 6 章会把组装好的消息发给模型，练习接收流式回复、处理请求失败和控制输出预算。
 
 ## 每一步的验证方式
 
 | 步骤 | 应观察到的结果 |
 | --- | --- |
 | 1. 核对候选项 | 两道题都指定了两份 README 的相关段落和本题需要的工具说明。 |
-| 2. 核对预算 | 相关长笔记可以用摘要保留。必需内容放不下时，测试会捕获错误。 |
-| 3. 对照输入 | 两道题的按需消息都更小。打开 `--messages` 可以核对保留的证据和工具说明。 |
+| 2. 核对预算 | 必需内容放不下时，测试会捕获错误。 |
+| 3. 核对摘要 | 用 `--messages` 检查 `review-notes` 的 `text`，确认默认预算用的是摘要。 |
+| 4. 对照输入 | 两道题的按需消息都更小，保留本题需要的证据和工具说明。 |
 
 ## 常见错误
 
@@ -167,7 +236,7 @@ pnpm build
 
 ## 延伸练习
 
-把预算从 1300 字节调到 1100 字节，观察哪些内容还会留下。两份 README 的必需段落仍然保留，长笔记的摘要会因剩余空间不足而跳过。可以用 `--messages` 核对。
+在 `context-fixture.ts` 里把 `review-notes` 的 `summary` 改成「保留出处，缺失项待核实。」再运行 `pnpm research:context --messages --max-input-bytes 1130`，看短摘要能否和两份必需的 README 段落一起放进去。
 
 ## 相关解释与参考
 
