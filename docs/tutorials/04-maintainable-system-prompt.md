@@ -31,7 +31,7 @@ pnpm research:plan
 
 这次 System Prompt 要求模型先写一份研究计划，用 JSON 返回。模型把「分别查项目 A 和 B 的 README」列为第一步。
 
-第 4 章的程序会逐项检查这份 JSON。某一步漏写 `doneWhen`，或在 `sourceIds` 里填了清单之外的 `web-search`，程序会指出具体哪一项有问题。校验通过后，命令才会显示计划。
+第 4 章的程序会检查计划的字段和资料来源。校验通过后，命令把计划显示在终端的 `plan` 字段里。
 
 接入 `read_document` 这样的读取工具后，应用可以把第一步和工具定义一起交给模型。模型请求读取 `a-readme` 和 `b-readme`，应用按 ID 找到两份 README，把正文交回模型。模型再根据 `doneWhen` 记下对应的段落标题，标出 README 里没说明的地方，为后面的对照表准备资料。
 
@@ -171,20 +171,43 @@ git restore --source=chapter-04-end --worktree -- packages/model-runtime/src/ind
 pnpm exec vitest run packages/model-runtime/test
 ```
 
-### 3. 检查计划的字段和来源
+### 3. 校验模型返回的计划
 
-`createResearchPlan` 用 `JSON.parse` 读出模型的回复，再检查计划里的内容。
+这次评审只允许查 `a-readme` 和 `b-readme`。离线测试里有一份模拟回复，把计划的第一步写成这样。
 
-- `questions` 和 `deliverable` 要写出研究问题和交付物。
-- 每个 `steps` 条目都要有动作、资料 ID 和完成条件。
-- `sourceIds` 里的每个 ID 都要在应用提供的清单里。本次只有 `a-readme` 和 `b-readme`。
+```json
+{
+  "action": "查找项目介绍",
+  "sourceIds": ["web-search"],
+  "doneWhen": "找到三篇文章"
+}
+```
+
+这一步能被 `JSON.parse` 读出来，三个字段也都有值。程序把 `web-search` 和本次允许的资料清单一对照，就会报错。
+
+```text
+steps[0].sourceIds[0] 使用了未授权来源。
+```
+
+`steps[0]` 指第一步，`sourceIds[0]` 指这一步列出的第一份资料。读报错就能定位到要检查的字段。
+
+`createResearchPlan` 收到回复后会做这些检查。
+
+1. 确认回复有没有达到输出上限。`finishReason` 为 `length` 时，直接报告输出达到上限。
+2. 用 `JSON.parse` 解析回复。解析后的值先按 `unknown` 处理，等实际字段检查完再组装成 `ResearchPlan`。
+3. 检查必填字段和类型。`questions` 和 `steps` 都要是非空数组，`deliverable` 要是非空字符串。每一步都要有动作、至少一个资料 ID 和非空的完成条件。第一步漏写 `doneWhen` 时，报错会指向 `steps[0].doneWhen`。
+4. 检查 `sourceIds` 里的每个 ID 是否在应用发请求前确定的清单里。
+
+校验失败时，命令显示错误并以退出码 `1` 结束。对 `doneWhen` 的检查只确认写了完成条件。执行这一步时，还要根据实际查到的段落核对条件，并在读资料时检查访问权限。
+
+用同一个评审请求换入不同的模拟回复，可以验证合法计划能通过、出错的计划能被拒绝。
 
 ```text
 git restore --source=chapter-04-end --worktree -- packages/research-core/src/research-plan.ts packages/research-core/src/review-fixture.ts packages/research-core/test/research-plan.test.ts
 pnpm exec vitest run packages/research-core/test/research-plan.test.ts -t "validated plan|invalid plan output|output limit"
 ```
 
-同一个评审请求可以用来测试不同的回复。漏写 `doneWhen` 时，程序会指出缺少完成条件。写入 `web-search` 时，会指出该来源未获授权。后续读取资料时，执行器仍需根据来源 ID 检查读取权限。
+这些测试会捕获预期的错误。用例通过，表示程序按预期指出了问题。
 
 ### 4. 在命令行验证同一个评审任务
 
